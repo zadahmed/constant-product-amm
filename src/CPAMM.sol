@@ -114,5 +114,22 @@ contract CPAMM {
         return x <= y ? x : y;
     }
 
-    function removeLiquidity() external {}
+    function removeLiquidity(uint _shares)
+        external
+        returns (uint amount0, uint amount1)
+    {
+        uint bal0 = token0.balanceOf(address(this));
+        uint bal1 = token1.balanceOf(address(this));
+
+        amount0 = (_shares * bal0) / totalSupply;
+        amount1 = (_shares * bal1) / totalSupply;
+
+        require(amount0 > 0 && amount1 > 0, "Amount0 or Amount1 is zero");
+
+        _burn(msg.sender, _shares);
+        _update(bal0 - amount0, bal1 - amount1);
+
+        token0.transfer(msg.sender, amount0);
+        token1.transfer(msg.sender, amount1);
+    }
 }
